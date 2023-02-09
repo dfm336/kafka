@@ -29,6 +29,8 @@ import java.util.Map;
  * Implement {@link org.apache.kafka.common.ClusterResourceListener} to receive cluster metadata once it's available. Please see the class documentation for ClusterResourceListener for more information.
  *
  * @param <T> Type to be serialized from.
+ *
+ *  用于将对象转换为字节的接口。实现此接口的类应具有不带参数的构造函数
  */
 public interface Serializer<T> extends Closeable {
 
@@ -63,6 +65,8 @@ public interface Serializer<T> extends Closeable {
     }
 
     /**
+     * 关闭此序列化程序。
+     * 此方法必须是幂等的，因为它可能会被多次调用
      * Close this serializer.
      * <p>
      * This method must be idempotent as it may be called multiple times.

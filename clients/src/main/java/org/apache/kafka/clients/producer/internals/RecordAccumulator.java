@@ -72,13 +72,18 @@ public class RecordAccumulator {
     private final int batchSize;
     private final CompressionType compression;
     private final int lingerMs;
-    private final long retryBackoffMs;
+`    private final long retryBackoffMs;
     private final int deliveryTimeoutMs;
     private final long partitionAvailabilityTimeoutMs;  // latency threshold for marking partition temporary unavailable
     private final boolean enableAdaptivePartitioning;
+    /**
+     * 是 ByteBuffer 的复用，
+     * 进行网络 传输前  ， byte[] 会先缓存到这
+     */
     private final BufferPool free;
     private final Time time;
     private final ApiVersions apiVersions;
+    //消息 会累积在这，TopicInfo 里面 维护了 一个  map，key:partition, value: Deque<Batch>
     private final ConcurrentMap<String /*topic*/, TopicInfo> topicInfoMap = new CopyOnWriteMap<>();
     private final ConcurrentMap<Integer /*nodeId*/, NodeLatencyStats> nodeStats = new CopyOnWriteMap<>();
     private final IncompleteBatches incomplete;

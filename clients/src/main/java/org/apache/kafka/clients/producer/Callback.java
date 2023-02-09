@@ -19,10 +19,13 @@ package org.apache.kafka.clients.producer;
 /**
  * A callback interface that the user can implement to allow code to execute when the request is complete. This callback
  * will generally execute in the background I/O thread so it should be fast.
+ *
+ * 用户可以实现的回调接口，以允许代码在请求完成时执行。此回调通常会在后台 I/O 线程中执行，因此应该很快
  */
 public interface Callback {
 
     /**
+     *
      * A callback method the user can implement to provide asynchronous handling of request completion. This method will
      * be called when the record sent to the server has been acknowledged. When exception is not null in the callback,
      * metadata will contain the special -1 value for all fields. If topicPartition cannot be
@@ -52,6 +55,9 @@ public interface Callback {
      *                  OffsetOutOfRangeException
      *                  TimeoutException
      *                  UnknownTopicOrPartitionException
+     *
+     *  用户可以实现的回调方法，用于提供请求完成的异步处理。当发送到服务器的记录被确认时，将调用此方法。当回调中的异常不为 null 时，
+     *                  元数据将包含所有字段的特殊 -1 值。如果无法选择 topicPartition，则将分配 -1 值。
      */
     void onCompletion(RecordMetadata metadata, Exception exception);
 }

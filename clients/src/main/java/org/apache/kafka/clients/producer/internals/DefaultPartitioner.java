@@ -32,12 +32,28 @@ import java.util.Map;
  * <li>If no partition or key is present choose the sticky partition that changes when the batch is full.
  * 
  * See KIP-480 for details about sticky partitioning.
+ *
+ *
+ org.apache.kafka.clients.producer.internals @Deprecated
+ public class DefaultPartitioner
+ extends Object
+ implements Partitioner
+ 注意：此分区程序已弃用，不应使用。要使用默认分区逻辑，请删除分区程序.class配置设置。有关更多信息，请参阅 KIP-794。默认分区策略：
+ 如果在记录中指定了分区，请使用它
+ 如果未指定分区但存在键，则根据键的哈希值选择分区
+ 如果不存在分区或键，请选择批处理已满时更改的粘性分区。有关粘性分区的详细信息，请参阅 KIP-480。
+ kafka.clients.main
+ *
  */
 @Deprecated
 public class DefaultPartitioner implements Partitioner {
 
     private final StickyPartitionCache stickyPartitionCache = new StickyPartitionCache();
 
+    /**
+     * configure()方法主要用来获取配置信息及初始化数据。
+     * @param configs
+     */
     public void configure(Map<String, ?> configs) {}
 
     /**
@@ -55,6 +71,7 @@ public class DefaultPartitioner implements Partitioner {
     }
 
     /**
+     * 计算当前 消息record 的 分区号
      * Compute the partition for the given record.
      *
      * @param topic The topic name
@@ -68,6 +85,7 @@ public class DefaultPartitioner implements Partitioner {
     public int partition(String topic, Object key, byte[] keyBytes, Object value, byte[] valueBytes, Cluster cluster,
                          int numPartitions) {
         if (keyBytes == null) {
+            //这里 会 轮询发送 给所有的 topic 内 所有可用的 partition
             return stickyPartitionCache.partition(topic, cluster);
         }
         return BuiltInPartitioner.partitionForKey(keyBytes, numPartitions);

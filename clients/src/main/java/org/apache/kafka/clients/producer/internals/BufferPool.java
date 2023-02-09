@@ -33,6 +33,14 @@ import org.apache.kafka.common.utils.Time;
 
 
 /**
+ *
+ *
+ org.apache.kafka.clients.producer.internals public class BufferPool
+ extends Object
+ 保持在给定内存限制下的字节缓冲区池。此类相当具体地满足生产者的需求。特别是它具有以下属性：
+ 有一个特殊的“池大小”，这种大小的缓冲区保存在免费列表中并回收
+ 这是公平的。也就是说，所有内存都提供给最长的等待线程，直到它有足够的内存。这可以防止线程请求大量内存并需要阻塞直到解除分配多个缓冲区时出现匮乏或死锁。
+ kafka.clients.main
  * A pool of ByteBuffers kept under a given memory limit. This class is fairly specific to the needs of the producer. In
  * particular it has the following properties:
  * <ol>

@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.kafka.common.utils.Utils;
 
 /**
+ * 实现用于粘性分区行为的缓存的内部类。缓存跟踪任何给定主题的当前粘性分区。不应在外部使用此类
  * An internal class that implements a cache used for sticky partitioning behavior. The cache tracks the current sticky
  * partition for any given topic. This class should not be used externally. 
  */
@@ -44,6 +45,7 @@ public class StickyPartitionCache {
     }
 
     public int nextPartition(String topic, Cluster cluster, int prevPartition) {
+        //获取 当前topic 下 可用的 所有 partition
         List<PartitionInfo> partitions = cluster.partitionsForTopic(topic);
         Integer oldPart = indexCache.get(topic);
         Integer newPart = oldPart;

@@ -325,6 +325,7 @@ public class BuiltInPartitioner {
      * Default hashing function to choose a partition from the serialized key bytes
      */
     public static int partitionForKey(final byte[] serializedKey, final int numPartitions) {
+        // 采 用 MurmurHash2 算法 ，具备高运算性能及低碰撞率
         return Utils.toPositive(Utils.murmur2(serializedKey)) % numPartitions;
     }
 

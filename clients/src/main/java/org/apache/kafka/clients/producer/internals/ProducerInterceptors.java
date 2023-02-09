@@ -41,6 +41,8 @@ public class ProducerInterceptors<K, V> implements Closeable {
     }
 
     /**
+     *
+     * 当客户端将记录发送到 KafkaProducer 时，在键和值被序列化之前，将调用此函数。该方法调用
      * This is called when client sends the record to KafkaProducer, before key and value gets serialized.
      * The method calls {@link ProducerInterceptor#onSend(ProducerRecord)} method. ProducerRecord
      * returned from the first interceptor's onSend() is passed to the second interceptor onSend(), and so on in the

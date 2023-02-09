@@ -1466,6 +1466,7 @@ public class Fetcher<K, V> implements Closeable {
     }
 
     /**
+     * 清除不属于新分配主题的缓冲数据
      * Clear the buffered data which are not a part of newly assigned topics
      *
      * @param assignedTopics  newly assigned topics
