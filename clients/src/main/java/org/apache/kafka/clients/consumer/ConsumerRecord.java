@@ -27,12 +27,15 @@ import java.util.Optional;
  * A key/value pair to be received from Kafka. This also consists of a topic name and 
  * a partition number from which the record is being received, an offset that points 
  * to the record in a Kafka partition, and a timestamp as marked by the corresponding ProducerRecord.
+ *
+ * 要从 Kafka 接收的键/值对。它还包括从中接收记录的主题名称和分区号、指向 Kafka 分区中记录的偏移量以及由相应 ProducerRecord 标记的时间戳。
  */
 public class ConsumerRecord<K, V> {
     public static final long NO_TIMESTAMP = RecordBatch.NO_TIMESTAMP;
     public static final int NULL_SIZE = -1;
 
     /**
+     * 此类不再公开校验和，此常量将在 Apache Kafka 4.0 中删除（自 3.0 起已弃用）
      * @deprecated checksums are no longer exposed by this class, this constant will be removed in Apache Kafka 4.0
      *             (deprecated since 3.0).
      */
@@ -41,13 +44,36 @@ public class ConsumerRecord<K, V> {
 
     private final String topic;
     private final int partition;
+    /**
+     *  这个消息 在 所属分区 的 偏移量
+     */
     private final long offset;
+    /**
+     *  timestamp 表示时间戳，与此对应的 timestampType 表示时间戳的 类型。
+     *  timestampType 有两种类型 : CreateTime 和 LogAppendTime
+     */
     private final long timestamp;
+
+    /**
+     * timestampType 有两种类型 :
+     * 1.CreateTime  创建时间
+     * 2.LogAppendTime 追加到 日志文件时间
+     */
     private final TimestampType timestampType;
     private final int serializedKeySize;
     private final int serializedValueSize;
+    /**
+     * 消息 头部 内容
+     */
     private final Headers headers;
+    /**
+     * 消息 键
+     */
     private final K key;
+    /**
+     * 消息体  需要读取的就是 这个 value
+     * 已经 经过反序列化
+     */
     private final V value;
     private final Optional<Integer> leaderEpoch;
 

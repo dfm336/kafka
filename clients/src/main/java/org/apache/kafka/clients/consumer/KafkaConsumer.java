@@ -914,6 +914,33 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     *
+     *
+     org.apache.kafka.clients.consumer.KafkaConsumer<K, V> public ConsumerRecords<K, V> poll(Duration timeout)
+     获取使用其中一个订阅/分配 API 指定的主题或分区的数据。在轮询数据之前未订阅任何主题或分区是错误的。
+     在每次轮询中，使用者将尝试使用上次消耗的偏移量作为起始偏移量并按顺序获取。上次使用的偏移量可以手动设置， seek(TopicPartition, long) 也可以自动设置为订阅分区列表的上次提交偏移量
+     当 isolation.level=read_committed 时，如果有可用的记录，或者如果仓位前进超过控制记录或中止的事务，则此方法会立即返回。否则，它将等待传递的超时。如果超时过期，将返回空记录集。请注意，此方法可能会阻止超时后执行自定义 ConsumerRebalanceListener 回调。
+
+     指定者：
+     poll 在界面中 Consumer
+     参数：
+     超时 – 阻止的最长时间（不得大于 Long.MAX_VALUE 毫秒）
+     返回：
+     自上次获取订阅的主题和分区列表以来的主题到记录的映射
+     抛出：
+     InvalidOffsetException – 如果一个分区或一组分区的偏移量未定义或超出范围，并且未配置偏移重置策略
+     org.apache.kafka.common.errors.WakeupException – 如果在 wakeup() 调用此函数之前或同时调用
+     InterruptException – 如果调用线程在调用此函数之前或期间中断
+     org.apache.kafka.common.errors.AuthenticationException – 如果身份验证失败。有关更多详细信息，请参阅例外
+     org.apache.kafka.common.errors.AuthorizationException – 如果调用方缺乏对任何订阅主题或配置的 groupID 的读取访问权限。有关更多详细信息，请参阅例外
+     KafkaException – 对于任何其他不可恢复的错误（例如无效的 groupId 或会话超时、反序列化键/值对时出错、重新平衡回调引发异常或未来版本中的任何新错误情况）
+     IllegalArgumentException – 如果超时值为负
+     IllegalStateException – 如果使用者未订阅任何主题或手动分配任何分区以从中消费
+     ArithmeticException – 如果超时大于 Long.MAX_VALUE 毫秒。
+     org.apache.kafka.common.errors.InvalidTopicException – 如果当前订阅包含任何无效主题（每个 org.apache.kafka.common.internals.Topic.validate(String)）
+     org.apache.kafka.common.errors.UnsupportedVersionException – 如果消费者在代理不支持此功能时尝试获取稳定的偏移量
+     org.apache.kafka.common.errors.FencedInstanceIdException – 如果此使用者实例被代理围起来。
+      kafka.clients.main
      * Subscribe to the given list of topics to get dynamically
      * assigned partitions. <b>Topic subscriptions are not incremental. This list will replace the current
      * assignment (if there is one).</b> Note that it is not possible to combine topic subscription with group management
@@ -946,7 +973,8 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
      * @throws IllegalArgumentException If topics is null or contains null or empty elements, or if listener is null
      * @throws IllegalStateException If {@code subscribe()} is called previously with pattern, or assign is called
      *                               previously (without a subsequent call to {@link #unsubscribe()}), or if not
-     *                               configured at-least one partition assignment strategy
+     *
+     *  configured at-least one partition assignment strategy
      */
     @Override
     public void subscribe(Collection<String> topics, ConsumerRebalanceListener listener) {
@@ -963,7 +991,6 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
                     if (Utils.isBlank(topic))
                         throw new IllegalArgumentException("Topic collection to subscribe to cannot contain null or empty topic");
                 }
-
                 throwIfNoAssignorsConfigured();
                 fetcher.clearBufferedDataForUnassignedTopics(topics);
                 log.info("Subscribed to topic(s): {}", Utils.join(topics, ", "));
@@ -1099,6 +1126,12 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
      * @throws IllegalArgumentException If partitions is null or contains null or empty topics
      * @throws IllegalStateException If {@code subscribe()} is called previously with topics or pattern
      *                               (without a subsequent call to {@link #unsubscribe()})
+     */
+    /**
+     * 手动将分区列表分配给此使用者。此接口不允许增量分配，并将替换以前的分配（如果有）。
+     * 如果给定的主题分区列表为空，则将其视为与 unsubscribe()相同。
+     * 通过此方法手动分配主题不使用使用者的组管理功能。因此，当组成员身份或集群和主题元数据更改时，不会触发重新平衡操作。请注意，不能同时使用 和 进行手动分区分配，也不能同时使用 进行
+     * @param partitions
      */
     @Override
     public void assign(Collection<TopicPartition> partitions) {
@@ -1243,6 +1276,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
                 final Fetch<K, V> fetch = pollForFetches(timer);
                 if (!fetch.isEmpty()) {
                     // before returning the fetched records, we can send off the next round of fetches
+                    //在返回获取的记录之前，我们可以发送下一轮获取
                     // and avoid block waiting for their responses to enable pipelining while the user
                     // is handling the fetched records.
                     //
@@ -1708,6 +1742,8 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     *
+     *
      * Get the offset of the <i>next record</i> that will be fetched (if a record with that offset exists).
      * This method may issue a remote call to the server if there is no current position for the given partition.
      * <p>
@@ -1732,6 +1768,14 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
      * @throws org.apache.kafka.common.KafkaException for any other unrecoverable errors
      * @throws org.apache.kafka.common.errors.TimeoutException if the position cannot be determined before the
      *             timeout specified by {@code default.api.timeout.ms} expires
+     *
+     *
+     *
+     *
+     *  获取将提取的 下一条 记录的偏移量（如果存在具有该偏移量的记录）。
+     *  如果给定分区没有当前位置，此方法可能会对服务器发出远程调用。
+     *  此调用将阻塞，直到可以确定位置或遇到不可恢复的错误（在这种情况下，它被抛出给调用方），
+     *  或者过期指定的 default.api.timeout.ms 超时（在这种情况下，将 a TimeoutException 抛出给调用方）
      */
     @Override
     public long position(TopicPartition partition) {
@@ -2044,6 +2088,20 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
      * @param partitions The partitions which should be paused
      * @throws IllegalStateException if any of the provided partitions are not currently assigned to this consumer
      */
+    /**
+     *
+     org.apache.kafka.clients.consumer.KafkaConsumer<K, V> public void pause(Collection<TopicPartition> partitions)
+     暂停从请求的分区进行读取。将来调用 将不会 poll(Duration) 从这些分区返回任何记录，直到使用 恢复 resume(Collection)这些分区。请注意，此方法不会影响分区订阅。特别是，当使用自动分配时，它不会导致组重新平衡。注意：重新平衡不会保留暂停/恢复状态。
+
+     指定者：
+     pause 在界面中 Consumer
+     参数：
+     分区 – 应暂停的分区
+     抛出：
+     IllegalStateException – 如果当前未将提供的任何分区分配给此使用者
+     kafka.clients.main
+     * @param partitions
+     */
     @Override
     public void pause(Collection<TopicPartition> partitions) {
         acquireAndEnsureOpen();
@@ -2058,6 +2116,16 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     org.apache.kafka.clients.consumer.KafkaConsumer<K, V> public void resume(Collection<TopicPartition> partitions)
+     恢复已暂停 pause(Collection)的指定分区。新的调用 poll(Duration) 将从这些分区返回记录（如果有要获取的记录）。如果分区之前未暂停，则此方法为无操作。
+
+     指定者：
+     resume 在界面中 Consumer
+     参数：
+     分区 – 应恢复的分区
+     抛出：
+     IllegalStateException – 如果当前未将提供的任何分区分配给此使用者
+     kafka.clients.main
      * Resume specified partitions which have been paused with {@link #pause(Collection)}. New calls to
      * {@link #poll(Duration)} will return records from these partitions if there are any to be fetched.
      * If the partitions were not previously paused, this method is a no-op.
@@ -2079,7 +2147,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
 
     /**
      * Get the set of partitions that were previously paused by a call to {@link #pause(Collection)}.
-     *
+     *  获取以前因调用 而 pause(Collection)暂停的分区集
      * @return The set of paused partitions
      */
     @Override
@@ -2489,6 +2557,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     * 获取灯锁并确保消费者没有关闭
      * Acquire the light lock and ensure that the consumer hasn't been closed.
      * @throws IllegalStateException If the consumer has been closed
      */
@@ -2501,10 +2570,22 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     *
+     *
+     org.apache.kafka.clients.consumer.KafkaConsumer<K, V> private void acquire()
+     获取保护此使用者免受多线程访问的灯锁。但是，当锁不可用时，我们不是阻塞，而是抛出异常（因为不支持多线程使用）。
+
+     抛出：
+     ConcurrentModificationException – 如果另一个线程已经有锁
+     kafka.clients.main
      * Acquire the light lock protecting this consumer from multi-threaded access. Instead of blocking
      * when the lock is not available, however, we just throw an exception (since multi-threaded usage is not
      * supported).
      * @throws ConcurrentModificationException if another thread already has the lock
+     */
+    /**
+     * acquire()方法和我们通常所说的锁(synchronized、 Lock等〉 不同，它不会造成阻塞等待，
+     * 我们可以将其看作一个轻量级锁，它仅通过线程操作计数标记的方式来检测线程是否发生了并 发操作，以此保证只有一个线程在操作。
      */
     private void acquire() {
         long threadId = Thread.currentThread().getId();
@@ -2514,6 +2595,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     * 释放 轻量级锁，保护使用者免受多线程访问
      * Release the light lock protecting the consumer from multi-threaded access.
      */
     private void release() {

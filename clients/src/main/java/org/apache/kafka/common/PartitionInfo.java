@@ -18,13 +18,22 @@ package org.apache.kafka.common;
 
 /**
  * This is used to describe per-partition state in the MetadataResponse.
+ * 这用于描述元数据响应中每个分区的状态。
+ *   kafka.clients.main
  */
 public class PartitionInfo {
     private final String topic;
     private final int partition;
+    //leader 副本所在位置
     private final Node leader;
+
+    //AR
     private final Node[] replicas;
+
+    //ISR
     private final Node[] inSyncReplicas;
+
+    //OSR
     private final Node[] offlineReplicas;
 
     public PartitionInfo(String topic, int partition, Node leader, Node[] replicas, Node[] inSyncReplicas) {
